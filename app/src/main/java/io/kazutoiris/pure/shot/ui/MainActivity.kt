@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import io.kazutoiris.pure.shot.ui.settings.SettingsScreen
+import io.kazutoiris.pure.shot.ui.settings.SettingsRoute
 import io.kazutoiris.pure.shot.ui.theme.PureShotTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PureShotTheme {
-                SettingsScreen()
+                SettingsRoute()
             }
         }
     }

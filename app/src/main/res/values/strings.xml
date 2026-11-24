@@ -1,4 +1,27 @@
 <resources>
     <string name="app_name">PureShot</string>
     <string name="settings_subtitle">Hide system UI for clean screenshots</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_hide">Hide</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_master_title">Enable PureShot</string>
+    <string name="settings_master_summary">Turn off to disable all hiding</string>
+    <string name="settings_status_bar_title">Status bar &amp; notifications</string>
+    <string name="settings_status_bar_summary">Includes heads-up notifications and dynamic island; restart System UI</string>
+    <string name="settings_nav_bar_title">Navigation bar</string>
+    <string name="settings_nav_bar_summary">Restart System UI after changing</string>
+    <string name="settings_ime_title">Input method</string>
+    <string name="settings_toast_title">Toast</string>
+    <string name="settings_overlays_title">Floating windows &amp; dialogs</string>
+    <string name="settings_other_title">Other system UI</string>
+    <string name="settings_other_summary">Volume panel, power menu, screenshot animation, etc.</string>
+    <string name="settings_effect_note">Changes apply to newly created windows. Restart System UI for status/navigation bars.</string>
+    <string name="settings_reset">Reset to defaults</string>
+    <string name="settings_reset_confirm">Reset all switches to defaults?</string>
+    <string name="settings_save_failed">Failed to save. Try again.</string>
+    <string name="settings_reset_done">Defaults restored</string>
+    <string name="settings_scope">Scope: System Framework (android)</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_local_only">Settings are stored only on this device</string>
+    <string name="settings_cancel">Cancel</string>
 </resources>

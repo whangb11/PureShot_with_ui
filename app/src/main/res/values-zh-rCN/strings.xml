@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">PureShot</string>
+    <string name="settings_subtitle">隐藏系统界面元素，获得纯净截图</string>
+    <string name="settings_section_general">通用</string>
+    <string name="settings_section_hide">隐藏项目</string>
+    <string name="settings_section_about">关于</string>
+    <string name="settings_master_title">启用 PureShot</string>
+    <string name="settings_master_summary">关闭后不做任何隐藏</string>
+    <string name="settings_status_bar_title">状态栏与通知</string>
+    <string name="settings_status_bar_summary">含通知弹窗与灵动岛；需重启系统界面</string>
+    <string name="settings_nav_bar_title">导航栏</string>
+    <string name="settings_nav_bar_summary">切换后需重启系统界面</string>
+    <string name="settings_ime_title">输入法</string>
+    <string name="settings_toast_title">Toast</string>
+    <string name="settings_overlays_title">悬浮窗与系统弹窗</string>
+    <string name="settings_other_title">其他系统 UI</string>
+    <string name="settings_other_summary">音量面板、电源菜单、截屏动画等</string>
+    <string name="settings_effect_note">开关仅对之后创建的窗口生效；状态栏/导航栏需重启系统界面。</string>
+    <string name="settings_reset">恢复默认</string>
+    <string name="settings_reset_confirm">将所有开关恢复为默认值？</string>
+    <string name="settings_save_failed">保存失败，请重试。</string>
+    <string name="settings_reset_done">已恢复默认</string>
+    <string name="settings_scope">作用域：系统框架 (android)</string>
+    <string name="settings_version">版本 %1$s</string>
+    <string name="settings_local_only">设置仅保存在本机</string>
+    <string name="settings_cancel">取消</string>
+</resources>
