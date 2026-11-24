@@ -2,5 +2,7 @@
 <resources>
     <string-array name="module_scope">
         <item>android</item>
+        <!-- LSPosed injects the module into its own app to redirect preferences for XSharedPreferences. -->
+        <item>io.kazutoiris.pure.shot</item>
     </string-array>
 </resources>

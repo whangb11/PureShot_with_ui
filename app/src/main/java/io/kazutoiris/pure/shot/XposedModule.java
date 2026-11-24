@@ -12,9 +12,22 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import io.kazutoiris.pure.shot.hook.Feature;
+import io.kazutoiris.pure.shot.hook.HookSettings;
+import io.kazutoiris.pure.shot.hook.WindowTypeFeatureMapper;
 
 
 public class XposedModule implements IXposedHookLoadPackage {
+
+	private static boolean shouldProcessWindow(int windowType) {
+		try {
+			Feature feature = WindowTypeFeatureMapper.map(windowType);
+			return HookSettings.get().isEnabled(feature);
+		} catch (Throwable t) {
+			// Never let settings failures break system_server; fall back to legacy "hide" behaviour.
+			return true;
+		}
+	}
 
 
 	@Override
@@ -40,8 +53,14 @@ public class XposedModule implements IXposedHookLoadPackage {
 									return;
 								}
 								SparseIntArray metadata = (SparseIntArray) param.args[7];
+								if (metadata == null) {
+									return;
+								}
 								int windowType = metadata.get(2, -1);
 								if (windowType < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW || windowType == WindowManager.LayoutParams.TYPE_WALLPAPER) {
+									return;
+								}
+								if (!shouldProcessWindow(windowType)) {
 									return;
 								}
 								if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.S) {
@@ -68,8 +87,14 @@ public class XposedModule implements IXposedHookLoadPackage {
 								protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 									super.afterHookedMethod(param);
 									WindowManager.LayoutParams attrs = (WindowManager.LayoutParams) XposedHelpers.getObjectField(param.thisObject, "mAttrs");
+									if (attrs == null) {
+										return;
+									}
 									int windowType = attrs.type;
 									if (windowType < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW || windowType == WindowManager.LayoutParams.TYPE_WALLPAPER) {
+										return;
+									}
+									if (!shouldProcessWindow(windowType)) {
 										return;
 									}
 									android.view.SurfaceControl surfaceControl = (android.view.SurfaceControl) XposedHelpers.getObjectField(param.thisObject, "mSurfaceControl");

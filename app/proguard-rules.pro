@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Xposed entry point is referenced by assets/xposed_init
+-keep class io.kazutoiris.pure.shot.XposedModule { *; }
+-keep class io.kazutoiris.pure.shot.hook.** { *; }
+-keep class io.kazutoiris.pure.shot.PrefKeys { *; }
+-keepclassmembers class * implements de.robv.android.xposed.IXposedHookLoadPackage { *; }
