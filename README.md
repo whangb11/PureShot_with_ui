@@ -36,6 +36,29 @@ Ideal for app previews, UI design, tutorials and clean screenshot sharing!
 * Toast
 * All other overlay/floating elements
 
+## ⚙️ Settings
+
+PureShot includes a small settings app (launcher icon) for choosing what gets hidden:
+
+* **Enable PureShot** — master switch; turn it off to disable all hiding.
+* **Status bar & notifications** — status bar, heads-up notifications and dynamic island.
+* **Navigation bar** — navigation/gesture bar.
+* **Input method** — on-screen keyboard.
+* **Toast** — toast messages.
+* **Floating windows & dialogs** — floating windows, PiP/mini windows and system dialogs.
+* **Other system UI** — volume panel, power menu, screenshot animation and similar.
+
+All switches are **on by default**, so existing behavior is unchanged. Toggles apply to windows
+created after the change; the status bar and navigation bar need a System UI restart (or a reboot)
+before screenshots reflect the new state. If a bar still appears in a screenshot right after a
+reboot, restart System UI once.
+
+There is no separate PiP switch: PiP and mini floating windows are controlled by the
+**Floating windows & dialogs** toggle. Notification popups and the dynamic island are controlled by
+**Status bar & notifications**.
+
+Settings are stored only on the device. PureShot requests no permissions and has no network access.
+
 ## ❤️ Final
 
 Enjoy :)
