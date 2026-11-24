@@ -18,6 +18,20 @@
         <meta-data
             android:name="xposedscope"
             android:resource="@array/module_scope" />
+        <meta-data
+            android:name="xposedsharedprefs"
+            android:value="true" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.PureShot">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 

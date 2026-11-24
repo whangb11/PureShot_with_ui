@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PureShot</string>
+    <string name="settings_subtitle">Hide system UI for clean screenshots</string>
 </resources>
