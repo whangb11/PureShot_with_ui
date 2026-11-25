@@ -11,8 +11,8 @@ android {
         applicationId "io.kazutoiris.pure.shot"
         minSdk 31
         targetSdkVersion 36
-        versionCode 5
-        versionName '5.0'
+        versionCode 4
+        versionName '4.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -2,7 +2,7 @@
 
 All notable changes to PureShot are documented here.
 
-## 5.0 — 2026-11-25
+## Unreleased
 
 ### Changed
 

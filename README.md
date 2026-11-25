@@ -17,7 +17,7 @@ leaving you with a clean, pure app shot only.
 > PureShot controls what appears in **screenshots and screen recordings** through
 > `SKIP_SCREENSHOT`. The live screen keeps its system bars; PureShot does not immersive-hide them.
 
-## 🆕 What's new in 5.0
+## 🆕 What's new
 
 * **libxposed API 102 only** — the legacy Xposed API and `XSharedPreferences` are gone. LSPosed or
   Vector 2.2+ is required and the module scope is now **System Framework (`system`)**.
