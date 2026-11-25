@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">PureShot</string>
+    <string name="app_description">Hide status bar, navigation bar, popups, PiP, toast &amp; more. Capture pure app screenshots on Android.</string>
     <string name="settings_subtitle">Hide system UI for clean screenshots</string>
     <string name="settings_section_general">General</string>
     <string name="settings_section_hide">Hide</string>
@@ -20,7 +21,7 @@
     <string name="settings_reset_confirm">Reset all switches to defaults?</string>
     <string name="settings_save_failed">Failed to save. Try again.</string>
     <string name="settings_reset_done">Defaults restored</string>
-    <string name="settings_scope">Scope: System Framework (android)</string>
+    <string name="settings_scope">Scope: System Framework (system)</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_local_only">Settings are stored only on this device</string>
     <string name="settings_cancel">Cancel</string>

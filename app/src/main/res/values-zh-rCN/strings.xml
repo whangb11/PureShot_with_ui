@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">PureShot</string>
+    <string name="app_description">隐藏状态栏、导航栏、弹窗、画中画、Toast 等系统界面，在 Android 上拍摄纯净的应用截图。</string>
     <string name="settings_subtitle">隐藏系统界面元素，获得纯净截图</string>
     <string name="settings_section_general">通用</string>
     <string name="settings_section_hide">隐藏项目</string>
@@ -20,7 +21,7 @@
     <string name="settings_reset_confirm">将所有开关恢复为默认值？</string>
     <string name="settings_save_failed">保存失败，请重试。</string>
     <string name="settings_reset_done">已恢复默认</string>
-    <string name="settings_scope">作用域：系统框架 (android)</string>
+    <string name="settings_scope">作用域：系统框架 (system)</string>
     <string name="settings_version">版本 %1$s</string>
     <string name="settings_local_only">设置仅保存在本机</string>
     <string name="settings_cancel">取消</string>

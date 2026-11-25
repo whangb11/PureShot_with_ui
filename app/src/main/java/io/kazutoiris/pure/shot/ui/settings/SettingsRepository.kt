@@ -1,6 +1,5 @@
 package io.kazutoiris.pure.shot.ui.settings
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import io.kazutoiris.pure.shot.PrefKeys
@@ -26,6 +25,7 @@ class SettingsRepository(context: Context) {
     fun initialize(): Boolean {
         val written = ensureDefaults()
         _state.value = readState()
+        RemoteSettingsSync.pushAll(prefs)
         return written
     }
 
@@ -35,6 +35,7 @@ class SettingsRepository(context: Context) {
         }.getOrDefault(false)
         if (saved) {
             _state.value = readState()
+            RemoteSettingsSync.pushAll(prefs)
         }
         return saved
     }
@@ -49,6 +50,7 @@ class SettingsRepository(context: Context) {
         }.getOrDefault(false)
         if (saved) {
             _state.value = readState()
+            RemoteSettingsSync.pushAll(prefs)
         }
         return saved
     }
@@ -87,7 +89,7 @@ class SettingsRepository(context: Context) {
         runCatching { getBoolean(key, default) }.getOrDefault(default)
 
     companion object {
-        private val defaultValues = linkedMapOf(
+        internal val defaultValues = linkedMapOf(
             PrefKeys.KEY_MODULE_ENABLED to PrefKeys.DEFAULT_MODULE_ENABLED,
             PrefKeys.KEY_HIDE_STATUS_BAR to PrefKeys.DEFAULT_HIDE_STATUS_BAR,
             PrefKeys.KEY_HIDE_NAVIGATION_BAR to PrefKeys.DEFAULT_HIDE_NAVIGATION_BAR,
@@ -97,13 +99,7 @@ class SettingsRepository(context: Context) {
             PrefKeys.KEY_HIDE_OTHER_SYSTEM_UI to PrefKeys.DEFAULT_HIDE_OTHER_SYSTEM_UI,
         )
 
-        @Suppress("DEPRECATION")
-        @SuppressLint("WorldReadableFiles")
-        private fun openPrefs(context: Context): SharedPreferences =
-            runCatching {
-                context.getSharedPreferences(PrefKeys.PREFS_FILE, Context.MODE_WORLD_READABLE)
-            }.getOrElse {
-                context.getSharedPreferences(PrefKeys.PREFS_FILE, Context.MODE_PRIVATE)
-            }
+        internal fun openPrefs(context: Context): SharedPreferences =
+            context.getSharedPreferences(PrefKeys.PREFS_FILE, Context.MODE_PRIVATE)
     }
 }

@@ -2,6 +2,7 @@ package io.kazutoiris.pure.shot;
 
 public final class PrefKeys {
 	public static final String PREFS_FILE = "pure_shot_settings";
+	public static final String REMOTE_PREFS_GROUP = "pure_shot";
 
 	public static final String KEY_MODULE_ENABLED = "module_enabled";
 	public static final String KEY_HIDE_STATUS_BAR = "hide_status_bar";

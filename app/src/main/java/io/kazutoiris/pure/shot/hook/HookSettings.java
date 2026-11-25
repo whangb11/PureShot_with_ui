@@ -1,36 +1,42 @@
 package io.kazutoiris.pure.shot.hook;
 
+import android.content.SharedPreferences;
 import android.os.SystemClock;
+import android.util.Log;
 
-import de.robv.android.xposed.XSharedPreferences;
-import de.robv.android.xposed.XposedBridge;
-import io.kazutoiris.pure.shot.BuildConfig;
+import io.github.libxposed.api.XposedInterface;
 import io.kazutoiris.pure.shot.PrefKeys;
 
 /**
- * Reads PureShot settings from the module's shared preferences inside system_server.
+ * Reads PureShot settings inside system_server from the libxposed remote preference group.
  *
- * <p>{@link XSharedPreferences} performs file IO, so results are cached in an immutable snapshot
- * for a short TTL. Any failure falls back to "everything enabled", matching the legacy behaviour
- * of the module and never letting an exception escape into system_server.
+ * <p>Results are cached in an immutable snapshot for a short TTL and invalidated immediately when
+ * the framework reports a preference change. Any failure falls back to "everything enabled",
+ * matching the legacy behaviour and never letting an exception escape into system_server.
  */
 public final class HookSettings {
 
 	private static final long TTL_MS = 1000L;
 
-	private static volatile Snapshot snapshot;
-	private static boolean loadFailureLogged;
+	private final XposedInterface xposed;
+	private final SharedPreferences.OnSharedPreferenceChangeListener changeListener =
+			(sharedPreferences, key) -> snapshot = null;
 
-	private HookSettings() {
+	private volatile Snapshot snapshot;
+	private SharedPreferences prefs;
+	private boolean loadFailureLogged;
+
+	public HookSettings(XposedInterface xposed) {
+		this.xposed = xposed;
 	}
 
-	public static Snapshot get() {
+	public Snapshot get() {
 		Snapshot current = snapshot;
 		long now = SystemClock.elapsedRealtime();
 		if (current != null && now - current.loadedAt < TTL_MS) {
 			return current;
 		}
-		synchronized (HookSettings.class) {
+		synchronized (this) {
 			current = snapshot;
 			now = SystemClock.elapsedRealtime();
 			if (current != null && now - current.loadedAt < TTL_MS) {
@@ -42,18 +48,22 @@ public final class HookSettings {
 		}
 	}
 
-	private static Snapshot load(long now) {
+	private Snapshot load(long now) {
 		try {
-			XSharedPreferences prefs = new XSharedPreferences(BuildConfig.APPLICATION_ID, PrefKeys.PREFS_FILE);
-			prefs.reload();
+			SharedPreferences current = prefs;
+			if (current == null) {
+				current = xposed.getRemotePreferences(PrefKeys.REMOTE_PREFS_GROUP);
+				current.registerOnSharedPreferenceChangeListener(changeListener);
+				prefs = current;
+			}
 			return new Snapshot(
-					readBoolean(prefs, PrefKeys.KEY_MODULE_ENABLED, PrefKeys.DEFAULT_MODULE_ENABLED),
-					readBoolean(prefs, PrefKeys.KEY_HIDE_STATUS_BAR, PrefKeys.DEFAULT_HIDE_STATUS_BAR),
-					readBoolean(prefs, PrefKeys.KEY_HIDE_NAVIGATION_BAR, PrefKeys.DEFAULT_HIDE_NAVIGATION_BAR),
-					readBoolean(prefs, PrefKeys.KEY_HIDE_INPUT_METHOD, PrefKeys.DEFAULT_HIDE_INPUT_METHOD),
-					readBoolean(prefs, PrefKeys.KEY_HIDE_TOAST, PrefKeys.DEFAULT_HIDE_TOAST),
-					readBoolean(prefs, PrefKeys.KEY_HIDE_OVERLAYS, PrefKeys.DEFAULT_HIDE_OVERLAYS),
-					readBoolean(prefs, PrefKeys.KEY_HIDE_OTHER_SYSTEM_UI, PrefKeys.DEFAULT_HIDE_OTHER_SYSTEM_UI),
+					readBoolean(current, PrefKeys.KEY_MODULE_ENABLED, PrefKeys.DEFAULT_MODULE_ENABLED),
+					readBoolean(current, PrefKeys.KEY_HIDE_STATUS_BAR, PrefKeys.DEFAULT_HIDE_STATUS_BAR),
+					readBoolean(current, PrefKeys.KEY_HIDE_NAVIGATION_BAR, PrefKeys.DEFAULT_HIDE_NAVIGATION_BAR),
+					readBoolean(current, PrefKeys.KEY_HIDE_INPUT_METHOD, PrefKeys.DEFAULT_HIDE_INPUT_METHOD),
+					readBoolean(current, PrefKeys.KEY_HIDE_TOAST, PrefKeys.DEFAULT_HIDE_TOAST),
+					readBoolean(current, PrefKeys.KEY_HIDE_OVERLAYS, PrefKeys.DEFAULT_HIDE_OVERLAYS),
+					readBoolean(current, PrefKeys.KEY_HIDE_OTHER_SYSTEM_UI, PrefKeys.DEFAULT_HIDE_OTHER_SYSTEM_UI),
 					now
 			);
 		} catch (Throwable t) {
@@ -62,7 +72,7 @@ public final class HookSettings {
 		}
 	}
 
-	private static boolean readBoolean(XSharedPreferences prefs, String key, boolean defaultValue) {
+	private static boolean readBoolean(SharedPreferences prefs, String key, boolean defaultValue) {
 		try {
 			return prefs.getBoolean(key, defaultValue);
 		} catch (ClassCastException e) {
@@ -70,15 +80,14 @@ public final class HookSettings {
 		}
 	}
 
-	private static void logFailureOnce(Throwable t) {
-		synchronized (HookSettings.class) {
+	private void logFailureOnce(Throwable t) {
+		synchronized (this) {
 			if (loadFailureLogged) {
 				return;
 			}
 			loadFailureLogged = true;
 		}
-		XposedBridge.log("PureShot: failed to read settings, using defaults");
-		XposedBridge.log(t);
+		xposed.log(Log.ERROR, "PureShot", "failed to read remote settings, using defaults", t);
 	}
 
 	public static final class Snapshot {
