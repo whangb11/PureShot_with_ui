@@ -17,6 +17,24 @@ leaving you with a clean, pure app shot only.
 > PureShot controls what appears in **screenshots and screen recordings** through
 > `SKIP_SCREENSHOT`. The live screen keeps its system bars; PureShot does not immersive-hide them.
 
+## 🆕 What's new in 5.0
+
+* **libxposed API 102 only** — the legacy Xposed API and `XSharedPreferences` are gone. LSPosed or
+  Vector 2.2+ is required and the module scope is now **System Framework (`system`)**.
+* **Android 12+** — API 31 is the new minimum; Android 10/11 paths were removed.
+* **Real-time settings** — changes are mirrored through `RemotePreferences` and applied to existing
+  system windows immediately. No System UI restart and no reboot.
+* **Per-app configuration** — every feature has an **Inherit / Hide / Don’t hide** override, plus a
+  per-app **Inherit / Force on / Force off** master switch.
+* **App picker** — case-insensitive search, three visibility levels, disabled-app markers and
+  PureShot excluded from the list.
+* **Hot reload** — installing an updated APK swaps the module code inside `system_server`; the same
+  swap is available from **Features → About → System hooks**.
+* **Dynamic `SKIP_SCREENSHOT`** — system windows are re-evaluated both ways, so a “Don’t hide”
+  override works without recreating the window.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full release notes.
+
 ## 🌟 Core Feature
 
 No extra UI, no overlays, just the pure app content you want.

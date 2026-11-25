@@ -29,8 +29,11 @@ public final class ForegroundAppTracker {
 	private final Runnable onForegroundChanged;
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
+	private static final long KEYGUARD_POLL_MS = 1000L;
+
 	private volatile String currentPackage;
 	private volatile boolean stopped;
+	private Boolean lastKeyguardShowing;
 	private Field packageNameField;
 	private Field activityComponentField;
 	private Field lastResumedField;
@@ -91,10 +94,38 @@ public final class ForegroundAppTracker {
 					});
 
 			handler.post(this::readInitialState);
+			handler.post(this::pollKeyguardState);
 			xposed.log(Log.INFO, TAG, "foreground app tracker hooked");
 		} catch (Throwable t) {
 			logOnce(Log.WARN, "failed to install foreground app tracker", t);
 		}
+	}
+
+	/**
+	 * Locking does not always resume a new activity, so keyguard transitions do not reach the
+	 * resume hook. Poll the resolved KeyguardController on the main looper and notify the policy
+	 * when the state flips, so the System UI fallback (or the restored app policy) is applied
+	 * immediately.
+	 */
+	private void pollKeyguardState() {
+		if (stopped) {
+			return;
+		}
+		boolean showing = isKeyguardShowing();
+		Boolean previous = lastKeyguardShowing;
+		if (previous == null || previous != showing) {
+			lastKeyguardShowing = showing;
+			xposed.log(Log.INFO, TAG, "keyguard " + (showing ? "showing" : "hidden"));
+			Runnable callback = onForegroundChanged;
+			if (callback != null) {
+				try {
+					callback.run();
+				} catch (Throwable t) {
+					logOnce(Log.WARN, "keyguard callback failed", t);
+				}
+			}
+		}
+		handler.postDelayed(this::pollKeyguardState, KEYGUARD_POLL_MS);
 	}
 
 	public String packageForPolicy() {
