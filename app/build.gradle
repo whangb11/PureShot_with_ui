@@ -53,6 +53,8 @@ dependencies {
     compileOnly 'io.github.libxposed:api:102.0.0'
     implementation 'io.github.libxposed:service:102.0.0'
     testImplementation 'junit:junit:4.13.2'
+    // Real org.json implementation for JVM unit tests; Android provides it at runtime.
+    testImplementation 'org.json:json:20240303'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 

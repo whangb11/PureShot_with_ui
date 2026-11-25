@@ -10,4 +10,7 @@
 
 # Kept stable for policy JSON / reflection used by later phases.
 -keep class io.kazutoiris.pure.shot.hook.Feature { *; }
+-keep class io.kazutoiris.pure.shot.hook.Override { *; }
+-keep class io.kazutoiris.pure.shot.hook.AppPolicy { *; }
+-keep class io.kazutoiris.pure.shot.hook.PerAppConfig { *; }
 -keep class io.kazutoiris.pure.shot.PrefKeys { *; }

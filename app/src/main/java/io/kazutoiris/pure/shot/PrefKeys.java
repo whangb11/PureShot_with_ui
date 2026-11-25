@@ -11,6 +11,15 @@ public final class PrefKeys {
 	public static final String KEY_HIDE_TOAST = "hide_toast";
 	public static final String KEY_HIDE_OVERLAYS = "hide_overlays";
 	public static final String KEY_HIDE_OTHER_SYSTEM_UI = "hide_other_system_ui";
+	public static final String KEY_PER_APP_CONFIG = "per_app_config";
+	public static final String KEY_APP_LIST_VISIBILITY = "app_list_visibility";
+
+	/** Local-only bookkeeping: the mirror still has changes that were not pushed remotely. */
+	public static final String KEY_PENDING_SYNC = "pending_sync";
+
+	/** Empty per-app configuration; kept in sync with {@code PerAppConfig.VERSION}. */
+	public static final String DEFAULT_PER_APP_CONFIG = "{\"version\":1,\"apps\":{}}";
+	public static final int DEFAULT_APP_LIST_VISIBILITY = 1;
 
 	public static final boolean DEFAULT_MODULE_ENABLED = true;
 	public static final boolean DEFAULT_HIDE_STATUS_BAR = true;
