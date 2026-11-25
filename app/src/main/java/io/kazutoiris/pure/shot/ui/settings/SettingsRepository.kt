@@ -1,109 +1,70 @@
 package io.kazutoiris.pure.shot.ui.settings
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import io.kazutoiris.pure.shot.PrefKeys
-import kotlinx.coroutines.flow.MutableStateFlow
+import io.github.libxposed.service.XposedService
+import io.kazutoiris.pure.shot.PureShotApp
+import io.kazutoiris.pure.shot.hook.Feature
+import io.kazutoiris.pure.shot.hook.Override
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
+/**
+ * UI-facing facade over the process-wide [SettingsStore].
+ *
+ * The real application shares one store so the service connection owned by [PureShotApp] reaches
+ * every screen. Isolated contexts (instrumentation tests) get their own store.
+ */
 class SettingsRepository(context: Context) {
 
-    private val prefs: SharedPreferences = openPrefs(context.applicationContext)
+    private val appContext = context.applicationContext ?: context
+    private val sharedStore = (appContext as? PureShotApp)?.settingsStore
+    private val store = sharedStore ?: SettingsStore(appContext)
+    private val ownsStore = sharedStore == null
 
-    private val _state = MutableStateFlow(readState())
-    val state: StateFlow<SettingsState> = _state.asStateFlow()
+    val state: StateFlow<SettingsState> = store.state
 
-    private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-        _state.value = readState()
-    }
-
-    init {
-        prefs.registerOnSharedPreferenceChangeListener(listener)
-    }
+    /** The bound framework service; null means the framework is unavailable. */
+    val service: StateFlow<XposedService?> = store.service
 
     fun initialize(): Boolean {
-        val written = ensureDefaults()
-        _state.value = readState()
+        val written = store.initialize()
+        store.retryPendingSync()
         return written
     }
 
-    fun setBoolean(key: String, value: Boolean): Boolean {
-        val saved = runCatching {
-            prefs.edit().putBoolean(key, value).commit()
-        }.getOrDefault(false)
-        if (saved) {
-            _state.value = readState()
-        }
-        return saved
-    }
+    fun setBoolean(key: String, value: Boolean): Boolean = store.setBoolean(key, value)
 
-    fun resetToDefaults(): Boolean {
-        val saved = runCatching {
-            val editor = prefs.edit()
-            defaultValues.forEach { (key, value) ->
-                editor.putBoolean(key, value)
-            }
-            editor.commit()
-        }.getOrDefault(false)
-        if (saved) {
-            _state.value = readState()
-        }
-        return saved
-    }
+    fun retryPendingSync() = store.retryPendingSync()
+
+    fun setAppMaster(packageName: String, master: Override): Boolean =
+        store.setAppMaster(packageName, master)
+
+    /** Pass `value = null` to clear the override and inherit the global switch. */
+    fun setAppFeature(packageName: String, feature: Feature, value: Boolean?): Boolean =
+        store.setAppFeature(packageName, feature, value)
+
+    fun clearApp(packageName: String): Boolean = store.clearApp(packageName)
+
+    fun setAppListVisibility(visibility: AppListVisibility): Boolean =
+        store.setAppListVisibility(visibility)
+
+    fun setPerAppConfigJson(json: String): Boolean = store.setPerAppConfigJson(json)
+
+    /** Resets global switches, every per-app override and the app-list visibility. */
+    fun resetAll(): Boolean = store.resetAll()
+
+    fun resetToDefaults(): Boolean = store.resetToDefaults()
 
     fun close() {
-        prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        if (ownsStore) {
+            store.close()
+        }
     }
 
-    private fun ensureDefaults(): Boolean = runCatching {
-        val editor = prefs.edit()
-        var changed = false
-        defaultValues.forEach { (key, value) ->
-            if (!prefs.contains(key)) {
-                editor.putBoolean(key, value)
-                changed = true
-            }
-        }
-        if (changed) {
-            editor.commit()
-        } else {
-            true
-        }
-    }.getOrDefault(false)
-
-    private fun readState(): SettingsState = SettingsState(
-        moduleEnabled = prefs.readBoolean(PrefKeys.KEY_MODULE_ENABLED, PrefKeys.DEFAULT_MODULE_ENABLED),
-        hideStatusBar = prefs.readBoolean(PrefKeys.KEY_HIDE_STATUS_BAR, PrefKeys.DEFAULT_HIDE_STATUS_BAR),
-        hideNavigationBar = prefs.readBoolean(PrefKeys.KEY_HIDE_NAVIGATION_BAR, PrefKeys.DEFAULT_HIDE_NAVIGATION_BAR),
-        hideInputMethod = prefs.readBoolean(PrefKeys.KEY_HIDE_INPUT_METHOD, PrefKeys.DEFAULT_HIDE_INPUT_METHOD),
-        hideToast = prefs.readBoolean(PrefKeys.KEY_HIDE_TOAST, PrefKeys.DEFAULT_HIDE_TOAST),
-        hideOverlays = prefs.readBoolean(PrefKeys.KEY_HIDE_OVERLAYS, PrefKeys.DEFAULT_HIDE_OVERLAYS),
-        hideOtherSystemUi = prefs.readBoolean(PrefKeys.KEY_HIDE_OTHER_SYSTEM_UI, PrefKeys.DEFAULT_HIDE_OTHER_SYSTEM_UI),
-    )
-
-    private fun SharedPreferences.readBoolean(key: String, default: Boolean): Boolean =
-        runCatching { getBoolean(key, default) }.getOrDefault(default)
-
     companion object {
-        private val defaultValues = linkedMapOf(
-            PrefKeys.KEY_MODULE_ENABLED to PrefKeys.DEFAULT_MODULE_ENABLED,
-            PrefKeys.KEY_HIDE_STATUS_BAR to PrefKeys.DEFAULT_HIDE_STATUS_BAR,
-            PrefKeys.KEY_HIDE_NAVIGATION_BAR to PrefKeys.DEFAULT_HIDE_NAVIGATION_BAR,
-            PrefKeys.KEY_HIDE_INPUT_METHOD to PrefKeys.DEFAULT_HIDE_INPUT_METHOD,
-            PrefKeys.KEY_HIDE_TOAST to PrefKeys.DEFAULT_HIDE_TOAST,
-            PrefKeys.KEY_HIDE_OVERLAYS to PrefKeys.DEFAULT_HIDE_OVERLAYS,
-            PrefKeys.KEY_HIDE_OTHER_SYSTEM_UI to PrefKeys.DEFAULT_HIDE_OTHER_SYSTEM_UI,
-        )
+        internal val defaultValues = SettingsStore.defaultValues
 
-        @Suppress("DEPRECATION")
-        @SuppressLint("WorldReadableFiles")
-        private fun openPrefs(context: Context): SharedPreferences =
-            runCatching {
-                context.getSharedPreferences(PrefKeys.PREFS_FILE, Context.MODE_WORLD_READABLE)
-            }.getOrElse {
-                context.getSharedPreferences(PrefKeys.PREFS_FILE, Context.MODE_PRIVATE)
-            }
+        internal fun openPrefs(context: Context): SharedPreferences =
+            SettingsStore.openPrefs(context)
     }
 }

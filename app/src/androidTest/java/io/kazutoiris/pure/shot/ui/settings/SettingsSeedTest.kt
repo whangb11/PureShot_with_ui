@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
  * instrumentation arguments, e.g.
  *
  * `-Pandroid.testInstrumentationRunnerArguments.module_enabled=false`
+ * `-Pandroid.testInstrumentationRunnerArguments.per_app_config={"version":1,"apps":{}}`
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsSeedTest {
@@ -28,6 +29,12 @@ class SettingsSeedTest {
                 arguments.getString(argument)?.toBooleanStrictOrNull()?.let { value ->
                     repository.setBoolean(key, value)
                 }
+            }
+            arguments.getString("per_app_config")?.let { json ->
+                repository.setPerAppConfigJson(json)
+            }
+            arguments.getString("app_list_visibility")?.toIntOrNull()?.let { level ->
+                repository.setAppListVisibility(AppListVisibility.fromLevel(level))
             }
         } finally {
             repository.close()
