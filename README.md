@@ -26,8 +26,8 @@ leaving you with a clean, pure app shot only.
   system windows immediately. No System UI restart and no reboot.
 * **Per-app configuration** — every feature has an **Inherit / Hide / Don’t hide** override, plus a
   per-app **Inherit / Force on / Force off** master switch.
-* **App picker** — case-insensitive search, three visibility levels, disabled-app markers and
-  PureShot excluded from the list.
+* **App picker** — one search box with an inline Launcher / User / All filter, compact app cards,
+  override-count badges and disabled-app markers. PureShot is excluded from the list.
 * **Hot reload** — installing an updated APK swaps the module code inside `system_server`; the same
   swap is available from **Features → About → System hooks**.
 * **Dynamic `SKIP_SCREENSHOT`** — system windows are re-evaluated both ways, so a “Don’t hide”
@@ -75,16 +75,21 @@ PureShot has two tabs.
 * Six global switches: status bar, navigation bar, input method, toast, floating windows, other
   system UI.
 * Every feature row has **Configure per app**, which opens a filtered app list for that feature.
+  The list starts with a fixed summary bar showing that feature's global state; tap it to toggle
+  the global switch without leaving the list.
 
 ### Apps
 
 * Search by app name or package name, case-insensitive.
-* Visibility levels:
-  1. **Apps with a launcher icon** (default)
-  2. **User-installed apps** (excludes system and updated-system apps)
-  3. **All apps** (includes system and disabled apps; disabled apps are marked)
+* The visibility filter sits at the trailing edge of the search box:
+  1. **Launcher** (default) — apps with a launcher icon
+  2. **User** — user-installed apps (excludes system and updated-system apps)
+  3. **All** — every app, including system and disabled apps (disabled apps are marked)
+* The number of matching apps is shown above the list.
 * PureShot itself is always excluded.
 * Each row has an app-level three-state switch: **Inherit / Force on / Force off**.
+* Apps with feature overrides show a small count badge next to the chevron.
+* Scroll position is kept when you open an app detail or a per-feature list and come back.
 * Tap an app to open its detail page:
   * app-level master switch;
   * six per-feature overrides (**Inherit / Hide / Don’t hide**);

@@ -21,7 +21,10 @@
     <string name="settings_effect_note">Changes take effect immediately, including windows that are already open.</string>
     <string name="settings_per_app_entry">Configure per app</string>
     <string name="settings_feature_override_count">%1$d app(s) overridden</string>
-    <string name="settings_app_override_count">%1$d feature override(s)</string>
+    <plurals name="settings_app_override_count">
+        <item quantity="one">%1$d feature override</item>
+        <item quantity="other">%1$d feature overrides</item>
+    </plurals>
     <string name="settings_tristate_inherit">Inherit</string>
     <string name="settings_tristate_hide">Hide</string>
     <string name="settings_tristate_show">Don’t hide</string>
@@ -29,17 +32,22 @@
     <string name="settings_tristate_master_off">Force off</string>
     <string name="settings_global_value_hidden">Global: hidden</string>
     <string name="settings_global_value_shown">Global: not hidden</string>
+    <string name="settings_global_feature_summary">Apps set to Inherit follow this.</string>
     <string name="settings_global_master_enabled">Global: PureShot is enabled</string>
     <string name="settings_global_master_disabled">Global: PureShot is disabled</string>
     <string name="settings_global_disabled_banner">PureShot is disabled globally. Per-app settings are saved but not applied.</string>
     <string name="settings_app_master_disabled_note">App master switch is off. Feature overrides are saved but not applied.</string>
-    <string name="settings_app_search_placeholder">Search name or package</string>
+    <string name="settings_app_search_placeholder">Search apps</string>
     <string name="settings_clear">Clear</string>
     <string name="settings_clear_search">Clear search</string>
-    <string name="settings_visibility_label">Show: %1$s</string>
-    <string name="settings_visibility_launcher">Apps with a launcher icon</string>
-    <string name="settings_visibility_user_installed">User-installed apps</string>
-    <string name="settings_visibility_all">All apps</string>
+    <string name="settings_filter_content_description">App filter: %1$s</string>
+    <string name="settings_visibility_launcher">Launcher</string>
+    <string name="settings_visibility_user_installed">User</string>
+    <string name="settings_visibility_all">All</string>
+    <plurals name="settings_app_count">
+        <item quantity="one">%1$d app</item>
+        <item quantity="other">%1$d apps</item>
+    </plurals>
     <string name="settings_apps_loading">Loading apps…</string>
     <string name="settings_apps_load_failed">Couldn’t load the app list.</string>
     <string name="settings_retry">Retry</string>

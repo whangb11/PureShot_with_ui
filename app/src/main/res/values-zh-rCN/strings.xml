@@ -21,7 +21,9 @@
     <string name="settings_effect_note">设置改动立即生效，已打开的系统 UI 窗口也会同步应用到截图。</string>
     <string name="settings_per_app_entry">按应用配置</string>
     <string name="settings_feature_override_count">%1$d 个应用已覆盖</string>
-    <string name="settings_app_override_count">已覆盖 %1$d 项功能</string>
+    <plurals name="settings_app_override_count">
+        <item quantity="other">%1$d 项功能覆盖</item>
+    </plurals>
     <string name="settings_tristate_inherit">跟随全局</string>
     <string name="settings_tristate_hide">隐藏</string>
     <string name="settings_tristate_show">不隐藏</string>
@@ -29,17 +31,21 @@
     <string name="settings_tristate_master_off">强制停用</string>
     <string name="settings_global_value_hidden">全局：隐藏</string>
     <string name="settings_global_value_shown">全局：不隐藏</string>
+    <string name="settings_global_feature_summary">对「跟随全局」的应用生效。</string>
     <string name="settings_global_master_enabled">全局：PureShot 已启用</string>
     <string name="settings_global_master_disabled">全局：PureShot 已停用</string>
     <string name="settings_global_disabled_banner">PureShot 已全局停用，逐应用配置会保存但暂不生效。</string>
     <string name="settings_app_master_disabled_note">应用总开关已停用，功能覆盖会保存但暂不生效。</string>
-    <string name="settings_app_search_placeholder">搜索应用名称或包名</string>
+    <string name="settings_app_search_placeholder">搜索应用</string>
     <string name="settings_clear">清除</string>
     <string name="settings_clear_search">清除搜索</string>
-    <string name="settings_visibility_label">显示：%1$s</string>
-    <string name="settings_visibility_launcher">有启动器图标的应用</string>
-    <string name="settings_visibility_user_installed">用户安装的应用</string>
-    <string name="settings_visibility_all">所有应用</string>
+    <string name="settings_filter_content_description">应用过滤：%1$s</string>
+    <string name="settings_visibility_launcher">启动器</string>
+    <string name="settings_visibility_user_installed">用户</string>
+    <string name="settings_visibility_all">全部</string>
+    <plurals name="settings_app_count">
+        <item quantity="other">%1$d 个应用</item>
+    </plurals>
     <string name="settings_apps_loading">正在加载应用…</string>
     <string name="settings_apps_load_failed">无法加载应用列表。</string>
     <string name="settings_retry">重试</string>

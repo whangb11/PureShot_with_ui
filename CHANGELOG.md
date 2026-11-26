@@ -15,6 +15,10 @@ All notable changes to PureShot are documented here.
   `RemotePreferences`. Changes apply immediately to existing windows.
 - `SKIP_SCREENSHOT` is applied through `SurfaceControl.Transaction` and can be toggled in both
   directions without recreating the affected window.
+- The app picker is more compact: search and the visibility filter share one field, app badges sit
+  on the name row, and per-app override counts moved to a small badge next to the chevron.
+- Per-feature app lists show the global value once in a fixed summary bar (with a switch) instead of
+  repeating it on every card.
 
 ### Added
 
@@ -22,6 +26,8 @@ All notable changes to PureShot are documented here.
 - Per-app master switch: **Inherit / Force on / Force off**.
 - App picker with case-insensitive search and three visibility levels:
   launcher apps, user-installed apps, and all apps (disabled apps are marked).
+- Result count in the app picker and retained scroll position when returning from app details or a
+  per-feature list.
 - Per-feature app lists from the Features tab and a dedicated app detail screen.
 - Automatic hot reload for module updates and a manual **Reload system hooks** action in
   **Features → About**.

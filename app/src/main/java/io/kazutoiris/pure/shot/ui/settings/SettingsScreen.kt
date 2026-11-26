@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -93,6 +95,15 @@ fun SettingsRoute(
         { packageName -> viewModel.loadIcon(packageName) }
     }
 
+    // Owned by the route so list screens keep their position across navigation. The effect only
+    // runs when the query or visibility actually changes, not when a screen is re-entered.
+    val appsListState = rememberLazyListState()
+    val featureAppsListState = rememberLazyListState()
+    LaunchedEffect(appList.query, appList.visibility) {
+        appsListState.scrollToItem(0)
+        featureAppsListState.scrollToItem(0)
+    }
+
     LaunchedEffect(viewModel, saveFailedMessage, resetDoneMessage, clearedMessage) {
         viewModel.events.collect { event ->
             val message = when (event) {
@@ -121,6 +132,7 @@ fun SettingsRoute(
             snackbarHostState = snackbarHostState,
             actions = actions,
             loadIcon = loadIcon,
+            listState = appsListState,
         )
 
         is SettingsDestination.FeatureApps -> FeatureAppsScreen(
@@ -130,6 +142,7 @@ fun SettingsRoute(
             snackbarHostState = snackbarHostState,
             actions = actions,
             loadIcon = loadIcon,
+            listState = featureAppsListState,
         )
 
         is SettingsDestination.AppDetail -> AppDetailScreen(
@@ -154,6 +167,7 @@ fun SettingsScreen(
     loadIcon: suspend (String) -> ImageBitmap?,
     hotReload: HotReloadUiState = HotReloadUiState(),
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
 ) {
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -205,6 +219,7 @@ fun SettingsScreen(
                     actions = actions,
                     loadIcon = loadIcon,
                     modifier = Modifier.weight(1f),
+                    listState = listState,
                 )
             }
         }
@@ -338,6 +353,7 @@ private fun AppsTab(
     actions: SettingsActions,
     loadIcon: suspend (String) -> ImageBitmap?,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         if (!state.moduleEnabled) {
@@ -349,6 +365,7 @@ private fun AppsTab(
             appList = appList,
             actions = actions,
             modifier = Modifier.weight(1f),
+            listState = listState,
         ) { app ->
             AppMasterCard(
                 app = app,

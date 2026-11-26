@@ -59,13 +59,15 @@ internal val globalFeatureRows = listOf(
     ),
 )
 
+internal fun globalFeatureRow(feature: Feature): GlobalFeatureRow? =
+    globalFeatureRows.firstOrNull { it.feature == feature }
+
 @StringRes
 internal fun featureTitleRes(feature: Feature): Int =
-    globalFeatureRows.firstOrNull { it.feature == feature }?.titleRes
-        ?: R.string.settings_other_title
+    globalFeatureRow(feature)?.titleRes ?: R.string.settings_other_title
 
 internal fun SettingsState.isFeatureHidden(feature: Feature): Boolean =
-    globalFeatureRows.firstOrNull { it.feature == feature }?.isHidden?.invoke(this) == true
+    globalFeatureRow(feature)?.isHidden?.invoke(this) == true
 
 @StringRes
 internal fun AppListVisibility.labelRes(): Int = when (this) {

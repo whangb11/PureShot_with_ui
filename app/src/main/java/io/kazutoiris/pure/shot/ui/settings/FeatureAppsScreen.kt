@@ -3,6 +3,8 @@ package io.kazutoiris.pure.shot.ui.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -34,6 +36,7 @@ fun FeatureAppsScreen(
     actions: SettingsActions,
     loadIcon: suspend (String) -> ImageBitmap?,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
 ) {
     Scaffold(
         modifier = modifier,
@@ -65,17 +68,23 @@ fun FeatureAppsScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
+            GlobalFeatureSummaryBar(
+                feature = feature,
+                state = state,
+                actions = actions,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            )
             AppListPane(
                 appList = appList,
                 actions = actions,
                 modifier = Modifier.weight(1f),
+                listState = listState,
             ) { app ->
                 val policy = state.perApp[app.packageName] ?: AppPolicy.DEFAULT
                 FeatureAppCard(
                     feature = feature,
                     app = app,
                     policy = policy,
-                    globalHidden = state.isFeatureHidden(feature),
                     actions = actions,
                     loadIcon = loadIcon,
                 )

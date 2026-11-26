@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,13 +29,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -44,8 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,20 +62,20 @@ import io.kazutoiris.pure.shot.hook.Override
 import java.util.Locale
 
 /**
- * Shared picker used by the Apps tab and by [FeatureAppsScreen]. The filter bar stays outside the
- * list so search and visibility remain reachable while scrolling.
+ * Shared picker used by the Apps tab and by [FeatureAppsScreen]. The search/filter bar stays outside
+ * the list so search and visibility remain reachable while scrolling.
+ *
+ * [listState] is owned by the route so entering and leaving detail screens keeps the scroll
+ * position; the route resets it when the query or visibility actually changes.
  */
 @Composable
 internal fun AppListPane(
     appList: AppListUiState,
     actions: SettingsActions,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
     itemContent: @Composable (AppEntry) -> Unit,
 ) {
-    val listState = rememberLazyListState()
-    LaunchedEffect(appList.query, appList.visibility) {
-        listState.scrollToItem(0)
-    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -79,13 +83,27 @@ internal fun AppListPane(
             .imePadding(),
     ) {
         Spacer(modifier = Modifier.height(12.dp))
-        AppFilterBar(
+        AppSearchFilterBar(
             query = appList.query,
             onQueryChange = actions.setQuery,
             visibility = appList.visibility,
             onVisibilityChange = actions.setVisibility,
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        if (appList.filtered.isNotEmpty()) {
+            Text(
+                text = pluralStringResource(
+                    R.plurals.settings_app_count,
+                    appList.filtered.size,
+                    appList.filtered.size,
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp, end = 4.dp),
+            )
+        }
         when {
             appList.loading && appList.apps.isEmpty() -> LoadingState(Modifier.weight(1f))
             appList.failed && appList.apps.isEmpty() -> LoadFailedState(
@@ -102,7 +120,7 @@ internal fun AppListPane(
             else -> LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(items = appList.filtered, key = { it.packageName }) { app ->
@@ -113,73 +131,83 @@ internal fun AppListPane(
     }
 }
 
+/** Single-line search field with the visibility filter tucked into the trailing slot. */
 @Composable
-private fun AppFilterBar(
+private fun AppSearchFilterBar(
     query: String,
     onQueryChange: (String) -> Unit,
     visibility: AppListVisibility,
     onVisibilityChange: (AppListVisibility) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            placeholder = { Text(text = stringResource(R.string.settings_app_search_placeholder)) },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = { focusManager.clearFocus() },
-            ),
-            trailingIcon = if (query.isNotEmpty()) {
-                {
-                    TextButton(onClick = { onQueryChange("") }) {
-                        Text(text = stringResource(R.string.settings_clear))
+    val clearLabel = stringResource(R.string.settings_clear_search)
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        placeholder = { Text(text = stringResource(R.string.settings_app_search_placeholder)) },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(
+            onSearch = { focusManager.clearFocus() },
+        ),
+        trailingIcon = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (query.isNotEmpty()) {
+                    TextButton(
+                        onClick = { onQueryChange("") },
+                        contentPadding = PaddingValues(horizontal = 8.dp),
+                        modifier = Modifier.semantics { contentDescription = clearLabel },
+                    ) {
+                        Text(
+                            text = "✕",
+                            modifier = Modifier.clearAndSetSemantics { },
+                        )
                     }
                 }
-            } else {
-                null
-            },
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        VisibilitySelector(
-            visibility = visibility,
-            onVisibilityChange = onVisibilityChange,
-        )
-    }
+                VerticalDivider(modifier = Modifier.height(24.dp))
+                FilterMenuButton(
+                    visibility = visibility,
+                    onVisibilityChange = onVisibilityChange,
+                )
+            }
+        },
+    )
 }
 
 @Composable
-private fun VisibilitySelector(
+private fun FilterMenuButton(
     visibility: AppListVisibility,
     onVisibilityChange: (AppListVisibility) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth()) {
-        OutlinedButton(
+    val filterDescription = stringResource(
+        R.string.settings_filter_content_description,
+        stringResource(visibility.labelRes()),
+    )
+    Box {
+        TextButton(
             onClick = { expanded = true },
-            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            modifier = Modifier.semantics { contentDescription = filterDescription },
         ) {
             Text(
-                text = stringResource(
-                    R.string.settings_visibility_label,
-                    stringResource(visibility.labelRes()),
-                ),
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Start,
+                text = stringResource(visibility.labelRes()),
+                style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = "▾",
-                style = MaterialTheme.typography.titleMedium,
+                text = " ▾",
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.clearAndSetSemantics { },
             )
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            modifier = Modifier.widthIn(min = 180.dp),
         ) {
             AppListVisibility.entries.forEach { level ->
                 val selected = level == visibility
@@ -346,6 +374,7 @@ private fun AppBadges(app: AppEntry, modifier: Modifier = Modifier) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                 )
             }
@@ -360,7 +389,6 @@ internal fun AppHeader(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     onClickLabel: String? = null,
-    supportingText: String? = null,
     trailing: (@Composable () -> Unit)? = null,
     iconSize: Dp = 40.dp,
 ) {
@@ -379,12 +407,16 @@ internal fun AppHeader(
         AppIcon(app = app, loadIcon = loadIcon, size = iconSize)
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = app.label,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = app.label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                AppBadges(app = app, modifier = Modifier.padding(start = 8.dp))
+            }
             Text(
                 text = app.packageName,
                 style = MaterialTheme.typography.bodySmall,
@@ -392,15 +424,6 @@ internal fun AppHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (supportingText != null) {
-                Text(
-                    text = supportingText,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-            }
-            AppBadges(app = app, modifier = Modifier.padding(top = 4.dp))
         }
         if (trailing != null) {
             Spacer(modifier = Modifier.width(8.dp))
@@ -417,6 +440,7 @@ internal fun AppMasterCard(
     actions: SettingsActions,
     loadIcon: suspend (String) -> ImageBitmap?,
 ) {
+    val overrideCount = policy.features.size
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             AppHeader(
@@ -424,18 +448,39 @@ internal fun AppMasterCard(
                 loadIcon = loadIcon,
                 onClick = { actions.openApp(app.packageName) },
                 onClickLabel = stringResource(R.string.settings_open_app_details),
-                supportingText = if (policy.features.isEmpty()) {
-                    null
-                } else {
-                    stringResource(R.string.settings_app_override_count, policy.features.size)
-                },
                 trailing = {
-                    Text(
-                        text = "›",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.clearAndSetSemantics { },
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (overrideCount > 0) {
+                            val description = pluralStringResource(
+                                R.plurals.settings_app_override_count,
+                                overrideCount,
+                                overrideCount,
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.clearAndSetSemantics {
+                                    contentDescription = description
+                                },
+                            ) {
+                                Text(
+                                    text = overrideCount.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
+                        Text(
+                            text = "›",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.clearAndSetSemantics { },
+                        )
+                    }
                 },
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -453,7 +498,6 @@ internal fun FeatureAppCard(
     feature: Feature,
     app: AppEntry,
     policy: AppPolicy,
-    globalHidden: Boolean,
     actions: SettingsActions,
     loadIcon: suspend (String) -> ImageBitmap?,
 ) {
@@ -463,13 +507,6 @@ internal fun FeatureAppCard(
             AppHeader(
                 app = app,
                 loadIcon = loadIcon,
-                supportingText = stringResource(
-                    if (globalHidden) {
-                        R.string.settings_global_value_hidden
-                    } else {
-                        R.string.settings_global_value_shown
-                    },
-                ),
             )
             Spacer(modifier = Modifier.height(8.dp))
             FeatureOverrideSelector(
